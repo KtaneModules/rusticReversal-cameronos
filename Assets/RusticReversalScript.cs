@@ -19,7 +19,10 @@ public class RusticReversalScript : MonoBehaviour {
    public Sprite[] Actualsprites;
 
    private int correctButton = 0;
-   private int towriteforlater = 0;
+   private int towriteforlater;
+   private int numberOfSolves;
+   private int numberOfUnsolves;
+   private bool activated;
    int numberToAdd = 0;
    static int ModuleIdCounter = 1;
    int ModuleId;
@@ -75,28 +78,42 @@ private List<string> spritesForNumber = new List<string>()
 
    void buttonPress(int button)
    {
-     if(!isCycling || !ModuleSolved)
+     if(!ModuleSolved)
      {
-     if(button == correctButton)
+     if(!isCycling)
      {
-       ModuleSolved = true;
-       Audio.PlaySoundAtTransform("Switch", DisplayTexts[0].transform);
+     if(!activated)
+     {
+       LookButtonPressed();
        StartGlitchEffect();
-       Solve();
-       Audio.PlaySoundAtTransform("Solve", DisplayTexts[0].transform);
-       StartCoroutine(StartWinEffect());
-       Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] Solved!", ModuleId);
+       Audio.PlaySoundAtTransform("Switch", DisplayTexts[0].transform);
+       Audio.PlaySoundAtTransform("Gears", DisplayTexts[0].transform);
+       activated = true;
      }
      else
      {
-       Audio.PlaySoundAtTransform("Switch", DisplayTexts[0].transform);
-       StartGlitchEffect();
-       StartCoroutine(StrikeEffect());
-       Strike();
-       Audio.PlaySoundAtTransform("Strike", DisplayTexts[0].transform);
-       Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] Strike! Defuser pressed button #" + button + " instead of button #" + correctButton + ".", ModuleId);
+       if(button == correctButton)
+       {
+         ModuleSolved = true;
+         Audio.PlaySoundAtTransform("Switch", DisplayTexts[0].transform);
+         StartGlitchEffect();
+         Solve();
+         Audio.PlaySoundAtTransform("Solve", DisplayTexts[0].transform);
+         StartCoroutine(StartWinEffect());
+         Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] Solved!", ModuleId);
+       }
+       else
+       {
+         Audio.PlaySoundAtTransform("Switch", DisplayTexts[0].transform);
+         StartGlitchEffect();
+         StartCoroutine(StrikeEffect());
+         Strike();
+         Audio.PlaySoundAtTransform("Strike", DisplayTexts[0].transform);
+         Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] Strike! Defuser pressed button #" + button + " instead of button #" + correctButton + ".", ModuleId);
+       }
      }
    }
+ }
    else
    {
      //nothing. cycle button disables
@@ -223,7 +240,7 @@ DisplayTexts[0].fontSize = 150;
 
   void SetRandomNumber(){
     int generatedNumber = Generate6DigitNumber();
-    int towriteforlater = generatedNumber;
+    towriteforlater = generatedNumber + 0;
     DisplayTexts[0].text = generatedNumber.ToString();
   }
 
@@ -249,7 +266,14 @@ void DetermineFirstSymbolNumber(int digitSum) {
         digitSum = digitSum - 1;
         break;
         case "BRUSH":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 3;
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "WELDER":
         digitSum = digitSum * 5;
@@ -265,7 +289,14 @@ void DetermineFirstSymbolNumber(int digitSum) {
         digitSum = digitSum - 25;
         break;
         case "CYLINDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 2;
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "PRESSURE-GAUGE":
             if (Bomb.GetSerialNumber().Any(ch => "AEIOU".Contains(ch)))
@@ -295,16 +326,31 @@ void DetermineFirstSymbolNumber(int digitSum) {
       switch(spritesForNumber[0].ToString().ToUpper())
       {
         case "WELDING-MASK":
-        digitSum = digitSum / Bomb.GetBatteryCount();
+        if(digitSum > 0)
+        {
+        digitSum = digitSum / Bomb.GetBatteryCount();;
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "CYLINDER":
         digitSum = digitSum + Bomb.GetSerialNumberNumbers().Last();
         break;
         case "PRESSURE-GAUGE":
-            digitSum = digitSum + BombInfo.GetSolvedModuleNames().Count;
+            FetchSolvedModuleCount();
+            digitSum = digitSum + numberOfSolves;
             break;
         case "GOOGLES":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / Bomb.GetPortPlateCount();
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "BRUSH":
         digitSum = digitSum * 12;
@@ -330,13 +376,21 @@ void DetermineFirstSymbolNumber(int digitSum) {
             digitSum = digitSum + dayOfMonth;
             break;
         case "GOOGLES":
-        digitSum = digitSum - BombInfo.GetSolvableModuleNames().Count;
+        FetchUnsolvedModuleCount();
+        digitSum = digitSum - numberOfUnsolves;
         break;
         case "BRUSH":
         digitSum = digitSum * 45;
         break;
         case "WELDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 4;
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
       }
       break;
@@ -363,13 +417,27 @@ void DetermineFirstSymbolNumber(int digitSum) {
             digitSum = digitSum - numberToAdd;
             break;
         case "GOOGLES":
-        digitSum = digitSum / Bomb.GetPortPlateCount();
+        if(digitSum > 0)
+        {
+        digitSum = digitSum / Bomb.GetPortPlateCount();;
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "BRUSH":
         digitSum = digitSum + 9;
         break;
         case "WELDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 6;
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
       }
       break;
@@ -391,7 +459,14 @@ void DetermineFirstSymbolNumber(int digitSum) {
 
         break;
         case "CYLINDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 2;
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "PRESSURE-GAUGE":
             digitSum = digitSum + 1337;
@@ -400,7 +475,14 @@ void DetermineFirstSymbolNumber(int digitSum) {
         digitSum = digitSum * 99;
         break;
         case "BRUSH":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 3;
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "WELDER":
         digitSum = digitSum + 333;
@@ -438,8 +520,14 @@ void DetermineSecondSymbolNumber(int digitSum) {
 
         break;
         case "BRUSH":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 3;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "WELDER":
         digitSum = digitSum * 5;
@@ -457,8 +545,14 @@ void DetermineSecondSymbolNumber(int digitSum) {
 
         break;
         case "CYLINDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 2;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "PRESSURE-GAUGE":
             if (Bomb.GetSerialNumber().Any(ch => "AEIOU".Contains(ch)))
@@ -492,20 +586,32 @@ void DetermineSecondSymbolNumber(int digitSum) {
       switch(spritesForNumber[1].ToString().ToUpper())
       {
         case "WELDING-MASK":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / Bomb.GetBatteryCount();
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "CYLINDER":
         digitSum = digitSum + Bomb.GetSerialNumberNumbers().Last();
 
         break;
         case "PRESSURE-GAUGE":
-            digitSum = digitSum + BombInfo.GetSolvedModuleNames().Count;
-
-            break;
+        FetchSolvedModuleCount();
+        digitSum = digitSum + numberOfSolves;
+          break;
         case "GOOGLES":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / Bomb.GetPortPlateCount();
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "BRUSH":
         digitSum = digitSum * 12;
@@ -536,7 +642,8 @@ void DetermineSecondSymbolNumber(int digitSum) {
 
             break;
         case "GOOGLES":
-        digitSum = digitSum - BombInfo.GetSolvableModuleNames().Count;
+        FetchUnsolvedModuleCount();
+        digitSum = digitSum - numberOfUnsolves;
 
         break;
         case "BRUSH":
@@ -544,8 +651,14 @@ void DetermineSecondSymbolNumber(int digitSum) {
 
         break;
         case "WELDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 4;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
       }
       break;
@@ -575,16 +688,28 @@ void DetermineSecondSymbolNumber(int digitSum) {
 
             break;
         case "GOOGLES":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / Bomb.GetPortPlateCount();
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "BRUSH":
         digitSum = digitSum + 9;
 
         break;
         case "WELDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 6;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
       }
       break;
@@ -606,8 +731,14 @@ void DetermineSecondSymbolNumber(int digitSum) {
 
         break;
         case "CYLINDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 2;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "PRESSURE-GAUGE":
             digitSum = digitSum + 1337;
@@ -618,8 +749,14 @@ void DetermineSecondSymbolNumber(int digitSum) {
 
         break;
         case "BRUSH":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 3;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "WELDER":
         digitSum = digitSum + 333;
@@ -656,8 +793,14 @@ void DetermineThirdSymbolNumber(int digitSum) {
 
         break;
         case "BRUSH":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 3;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "WELDER":
         digitSum = digitSum * 5;
@@ -675,8 +818,14 @@ void DetermineThirdSymbolNumber(int digitSum) {
 
         break;
         case "CYLINDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 2;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "PRESSURE-GAUGE":
             if (Bomb.GetSerialNumber().Any(ch => "AEIOU".Contains(ch)))
@@ -710,20 +859,32 @@ void DetermineThirdSymbolNumber(int digitSum) {
       switch(spritesForNumber[2].ToString().ToUpper())
       {
         case "WELDING-MASK":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / Bomb.GetBatteryCount();
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "CYLINDER":
         digitSum = digitSum + Bomb.GetSerialNumberNumbers().Last();
 
         break;
         case "PRESSURE-GAUGE":
-            digitSum = digitSum + BombInfo.GetSolvedModuleNames().Count;
-
+        FetchSolvedModuleCount();
+        digitSum = digitSum + numberOfSolves;
             break;
         case "GOOGLES":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / Bomb.GetPortPlateCount();
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "BRUSH":
         digitSum = digitSum * 12;
@@ -754,7 +915,8 @@ void DetermineThirdSymbolNumber(int digitSum) {
 
             break;
         case "GOOGLES":
-        digitSum = digitSum - BombInfo.GetSolvableModuleNames().Count;
+        FetchUnsolvedModuleCount();
+        digitSum = digitSum - numberOfUnsolves;
 
         break;
         case "BRUSH":
@@ -762,8 +924,14 @@ void DetermineThirdSymbolNumber(int digitSum) {
 
         break;
         case "WELDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 4;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
       }
       break;
@@ -793,16 +961,28 @@ void DetermineThirdSymbolNumber(int digitSum) {
 
             break;
         case "GOOGLES":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / Bomb.GetPortPlateCount();
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "BRUSH":
         digitSum = digitSum + 9;
 
         break;
         case "WELDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 6;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
       }
       break;
@@ -824,8 +1004,14 @@ void DetermineThirdSymbolNumber(int digitSum) {
 
         break;
         case "CYLINDER":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 2;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "PRESSURE-GAUGE":
             digitSum = digitSum + 1337;
@@ -836,8 +1022,14 @@ void DetermineThirdSymbolNumber(int digitSum) {
 
         break;
         case "BRUSH":
+        if(digitSum > 0)
+        {
         digitSum = digitSum / 3;
-
+        }
+        else
+        {
+          digitSum = digitSum;
+        }
         break;
         case "WELDER":
         digitSum = digitSum + 333;
@@ -853,7 +1045,7 @@ void DetermineThirdSymbolNumber(int digitSum) {
     }
     else
     {
-      finalnumTry3 = finalnumTry3 % 10;
+      finalnumTry3 = Mathf.CeilToInt(finalnumTry3);
     }
     correctButton = GetNumberWithinRange(finalnumTry3);
     Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] The button to press is: #" + correctButton + ".", ModuleId);
@@ -874,10 +1066,9 @@ private int GetNumberWithinRange(int inputNumber)
 }
 
   void DetermineFirstNumber() {
-    int solvedModuleCount = BombInfo.GetSolvedModuleNames().Count;
     int displayedNumber = towriteforlater;
     int reversedNumber = ReverseNumber(displayedNumber);
-    int totalSum = reversedNumber + solvedModuleCount;
+    int totalSum = reversedNumber;
     int digitSum = 0;
     string totalSumString = totalSum.ToString();
     for (int i = 0; i < totalSumString.Length; i++) {
@@ -955,7 +1146,28 @@ void LogSymbolInformation(){
 
    }
 
+   void FetchSolvedModuleCount()
+   {
+     int numberOfSolves = BombInfo.GetSolvedModuleNames().Count;
+     numberOfSolves = numberOfSolves;
+   }
+
+   void FetchUnsolvedModuleCount()
+   {
+     int numberOfUnsolves = BombInfo.GetSolvableModuleNames().Count;
+     numberOfUnsolves = numberOfUnsolves;
+   }
+
    void Start () { //Shit to start with
+     //Activate later
+     activated = false;
+     DisplayTexts[0].text = "";
+     Sprites[0].sprite = Actualsprites[6];
+     Sprites[1].sprite = Actualsprites[6];
+     Sprites[2].sprite = Actualsprites[6];
+   }
+
+   void LookButtonPressed(){
      SetRandomNumber();
      SetSpriteColors();
      SetSprites();
