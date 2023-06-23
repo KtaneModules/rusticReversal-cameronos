@@ -23,10 +23,16 @@ public class RusticReversalScript : MonoBehaviour {
    private int numberOfSolves;
    private int numberOfUnsolves;
    private bool activated;
+   private string numbertoreuse;
+   private bool stage1;
    int numberToAdd = 0;
+   int lastDigit = 0;
    static int ModuleIdCounter = 1;
    int ModuleId;
    private bool ModuleSolved;
+
+//So embarassing...
+//https://soundcloud.com/3818/dossed
 
    private Color[] symbolColors = {
     new Color(1, 0, 0),        // Red symbol done
@@ -141,6 +147,7 @@ private IEnumerator StartWinEffect()
 
    private void StartGlitchEffect()
    {
+     numbertoreuse = DisplayTexts[0].text.ToString();
        if (glitchCoroutine != null)
            StopCoroutine(glitchCoroutine);
 
@@ -200,11 +207,21 @@ private IEnumerator StrikeEffect()
     isCycling = false; // Set cycling state to false when duration is over
 }
 }
+if(!stage1)
+{
 int stage2 = Generate6DigitNumber();
 DisplayTexts[0].text = stage2.ToString();
 DisplayTexts[0].color = symbolColors[0];
 DisplayTexts[0].fontSize = 150;
    }
+   else
+   {
+     stage1=true;
+     DisplayTexts[0].text = numbertoreuse;
+     DisplayTexts[0].fontSize = 150;
+     DisplayTexts[0].color = symbolColors[0];
+   }
+}
 
    private string GetGlitchedText()
    {
@@ -240,12 +257,12 @@ DisplayTexts[0].fontSize = 150;
 
   void SetRandomNumber(){
     int generatedNumber = Generate6DigitNumber();
-    towriteforlater = generatedNumber + 0;
+    towriteforlater = generatedNumber;
     DisplayTexts[0].text = generatedNumber.ToString();
   }
 
 void DetermineFirstSymbolNumber(int digitSum) {
-  Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] - The number made with the display is: #" + digitSum + ".", ModuleId);
+  Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] - The number made from the display is: #" + digitSum + ".", ModuleId);
     switch (colorsForNumber[0].ToUpper())
     {
 
@@ -345,7 +362,7 @@ void DetermineFirstSymbolNumber(int digitSum) {
         case "GOOGLES":
         if(digitSum > 0)
         {
-        digitSum = digitSum / Bomb.GetPortPlateCount();
+        digitSum = digitSum / Bomb.GetPortCount();
         }
         else
         {
@@ -373,7 +390,7 @@ void DetermineFirstSymbolNumber(int digitSum) {
         break;
         case "PRESSURE-GAUGE":
         int dayOfMonth = DateTime.Now.Day;
-            digitSum = digitSum + dayOfMonth;
+            digitSum = digitSum - dayOfMonth;
             break;
         case "GOOGLES":
         FetchUnsolvedModuleCount();
@@ -419,7 +436,7 @@ void DetermineFirstSymbolNumber(int digitSum) {
         case "GOOGLES":
         if(digitSum > 0)
         {
-        digitSum = digitSum / Bomb.GetPortPlateCount();;
+        digitSum = digitSum / Bomb.GetPortCount();
         }
         else
         {
@@ -491,7 +508,8 @@ void DetermineFirstSymbolNumber(int digitSum) {
       break;
     }
     Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] - The number made with the first icon is: #" + digitSum + ".", ModuleId);
-    DetermineSecondSymbolNumber(digitSum);
+    int SecondStageNum = digitSum;
+    DetermineSecondSymbolNumber(SecondStageNum);
 }
 
 //SECOND
@@ -606,7 +624,7 @@ void DetermineSecondSymbolNumber(int digitSum) {
         case "GOOGLES":
         if(digitSum > 0)
         {
-        digitSum = digitSum / Bomb.GetPortPlateCount();
+        digitSum = digitSum / Bomb.GetPortCount();
         }
         else
         {
@@ -638,7 +656,7 @@ void DetermineSecondSymbolNumber(int digitSum) {
         break;
         case "PRESSURE-GAUGE":
         int dayOfMonth = DateTime.Now.Day;
-            digitSum = digitSum + dayOfMonth;
+            digitSum = digitSum - dayOfMonth;
 
             break;
         case "GOOGLES":
@@ -690,7 +708,7 @@ void DetermineSecondSymbolNumber(int digitSum) {
         case "GOOGLES":
         if(digitSum > 0)
         {
-        digitSum = digitSum / Bomb.GetPortPlateCount();
+        digitSum = digitSum / Bomb.GetPortCount();
         }
         else
         {
@@ -765,7 +783,8 @@ void DetermineSecondSymbolNumber(int digitSum) {
       break;
     }
     Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] - The number made with the second icon is: #" + digitSum + ".", ModuleId);
-    DetermineThirdSymbolNumber(digitSum);
+    int ThirdStageNum = digitSum;
+    DetermineThirdSymbolNumber(ThirdStageNum);
 }
 
 //THIRD
@@ -879,7 +898,7 @@ void DetermineThirdSymbolNumber(int digitSum) {
         case "GOOGLES":
         if(digitSum > 0)
         {
-        digitSum = digitSum / Bomb.GetPortPlateCount();
+        digitSum = digitSum / Bomb.GetPortCount();
         }
         else
         {
@@ -911,7 +930,7 @@ void DetermineThirdSymbolNumber(int digitSum) {
         break;
         case "PRESSURE-GAUGE":
         int dayOfMonth = DateTime.Now.Day;
-            digitSum = digitSum + dayOfMonth;
+            digitSum = digitSum - dayOfMonth;
 
             break;
         case "GOOGLES":
@@ -963,7 +982,7 @@ void DetermineThirdSymbolNumber(int digitSum) {
         case "GOOGLES":
         if(digitSum > 0)
         {
-        digitSum = digitSum / Bomb.GetPortPlateCount();
+        digitSum = digitSum / Bomb.GetPortCount();
         }
         else
         {
@@ -1038,16 +1057,19 @@ void DetermineThirdSymbolNumber(int digitSum) {
       }
       break;
     }
+    Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] - The number made with the third icon is: #" + digitSum + ".", ModuleId);
     int finalnumTry3 = digitSum;
     if(finalnumTry3 < 0)
     {
       finalnumTry3 = 1;
+      lastDigit = finalnumTry3 % 10;
     }
     else
     {
       finalnumTry3 = Mathf.CeilToInt(finalnumTry3);
+      lastDigit = finalnumTry3 % 10;
     }
-    correctButton = GetNumberWithinRange(finalnumTry3);
+    correctButton = GetNumberWithinRange(lastDigit);
     Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] The button to press is: #" + correctButton + ".", ModuleId);
 }
 
@@ -1076,7 +1098,9 @@ private int GetNumberWithinRange(int inputNumber)
       digitSum += digit;
     }
     //Go to symbol solving!!
+    Debug.LogFormat("[Rustic Reversal " + "#" + ModuleId + "] - The number made from the display is: #" + digitSum + ".", ModuleId);
     DetermineFirstSymbolNumber(digitSum);
+    stage1=true;
   }
 
   private int ReverseNumber(int number)
@@ -1169,8 +1193,8 @@ void LogSymbolInformation(){
 
    void LookButtonPressed(){
      SetRandomNumber();
-     SetSpriteColors();
      SetSprites();
+     SetSpriteColors();
      LogSymbolInformation();
      DetermineFirstNumber();
    }
